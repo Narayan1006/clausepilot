@@ -1,0 +1,62 @@
+# ── Secrets ───────────────────────────────────
+.env
+*.env
+!.env.example
+
+# ── Python ────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.log
+
+# ── Virtual Environments ─────────────────────
+venv/
+.venv/
+env/
+ENV/
+backend/venv/
+backend/.venv/
+
+# ── Node / Frontend ───────────────────────────
+node_modules/
+frontend/node_modules/
+*.local
+frontend/dist/
+frontend/.vite/
+
+# ── Uploads & Data ────────────────────────────
+uploads/
+backend/uploads/
+*.db
+clausepilot.db
+backend/clausepilot.db
+chroma_db/
+backend/chroma_db/
+
+# ── IDE ───────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Sample PDFs (generated, not tracked) ──────
+sample-documents/*.pdf

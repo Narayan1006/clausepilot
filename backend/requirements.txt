@@ -1,0 +1,35 @@
+# ClausePilot Backend Dependencies
+# ─────────────────────────────────────────────
+# Core API
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-multipart==0.0.12
+pydantic==2.10.3
+pydantic-settings==2.6.1
+
+# PDF Extraction
+PyMuPDF==1.24.14
+
+# Environment
+python-dotenv==1.0.1
+
+# HTTP client (for future LLM calls)
+httpx==0.28.1
+
+# ── Phase 2+ (interfaces defined, not initialized) ──
+# These are declared now so the interface contracts exist.
+# Do NOT initialize these during startup in Phase 1.
+groq==0.13.0
+chromadb==0.5.23
+sentence-transformers==3.3.1
+
+# ── Sample document generation ──────────────────────
+reportlab==4.2.5
+
+# ── Testing ──────────────────────────────────────────
+pytest==8.3.4
+pytest-asyncio==0.24.0
+httpx==0.28.1
+
+# ── Code quality ─────────────────────────────────────
+ruff==0.8.4
