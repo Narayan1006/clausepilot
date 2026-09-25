@@ -101,8 +101,14 @@ export interface HealthResponse {
     document_comparison: boolean;
   };
 }
+const isBrowser = typeof window !== 'undefined';
+const isVercelOrRemote = isBrowser && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// On Vercel, requests to /health and /api/* are reverse-proxied by vercel.json rewrites directly to Render,
+// guaranteeing zero CORS errors. On local dev, use VITE_API_URL or fallback to http://localhost:8000.
+const API_BASE_URL = isVercelOrRemote 
+  ? '' 
+  : (import.meta.env.VITE_API_URL || 'http://localhost:8000');
 
 export async function checkHealth(): Promise<HealthResponse> {
   const res = await fetch(`${API_BASE_URL}/health`);

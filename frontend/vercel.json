@@ -4,6 +4,22 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/health",
+      "destination": "https://clausepilot-backend.onrender.com/health"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://clausepilot-backend.onrender.com/api/:path*"
+    },
+    {
+      "source": "/docs",
+      "destination": "https://clausepilot-backend.onrender.com/docs"
+    },
+    {
+      "source": "/openapi.json",
+      "destination": "https://clausepilot-backend.onrender.com/openapi.json"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
