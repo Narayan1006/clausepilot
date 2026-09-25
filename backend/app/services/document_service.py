@@ -158,6 +158,23 @@ class DocumentService:
             character_count=len(text),
         )
 
+    def get_all_pages(self, document_id: str) -> List[DocumentPageResponse]:
+        """Fetch all pages for a document in a single batched query to eliminate N+1 roundtrips."""
+        with get_connection() as conn:
+            rows = conn.execute(
+                "SELECT document_id, page_number, text FROM document_pages WHERE document_id = ? ORDER BY page_number ASC",
+                (document_id,),
+            ).fetchall()
+        return [
+            DocumentPageResponse(
+                document_id=row["document_id"],
+                page_number=row["page_number"],
+                text=row["text"],
+                character_count=len(row["text"] or ""),
+            )
+            for row in rows
+        ]
+
     # ─────────────────────────────────────────────
     # Delete
     # ─────────────────────────────────────────────

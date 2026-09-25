@@ -27,7 +27,7 @@ router = APIRouter(prefix="/api/documents", tags=["chat"])
     summary="Index document for semantic search (Phase 2)",
     status_code=status.HTTP_200_OK,
 )
-async def index_document(
+def index_document(
     document_id: str,
     doc_service: DocumentService = Depends(get_document_service),
     rag: RagPipeline = Depends(get_rag_pipeline),
@@ -40,13 +40,14 @@ async def index_document(
             detail=f"Document '{document_id}' not found.",
         )
 
-    # Fetch all pages
-    pages = []
-    for p in range(1, doc.page_count + 1):
-        page = doc_service.get_page(document_id, p)
-        if page and page.text:
-            from app.services.extraction_service import DocumentPage
-            pages.append(DocumentPage(page_number=p, text=page.text))
+    # Fetch all pages efficiently in a single query
+    all_pages = doc_service.get_all_pages(document_id)
+    from app.services.extraction_service import DocumentPage
+    pages = [
+        DocumentPage(page_number=p.page_number, text=p.text)
+        for p in all_pages
+        if p.text
+    ]
 
     if not pages:
         raise HTTPException(
@@ -71,7 +72,7 @@ async def index_document(
     summary="Ask a question about a document (Phase 2)",
     status_code=status.HTTP_200_OK,
 )
-async def ask_question(
+def ask_question(
     document_id: str,
     request: ChatRequest,
     doc_service: DocumentService = Depends(get_document_service),
@@ -118,7 +119,7 @@ async def ask_question(
     summary="Retrieve raw evidence chunks for inspection",
     status_code=status.HTTP_200_OK,
 )
-async def get_evidence(
+def get_evidence(
     document_id: str,
     request: ChatRequest,
     doc_service: DocumentService = Depends(get_document_service),

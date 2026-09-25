@@ -71,6 +71,16 @@ CREATE TABLE IF NOT EXISTS clauses (
 );
 """
 
+_CREATE_INDEXES = [
+    "CREATE INDEX IF NOT EXISTS idx_doc_pages_doc_id ON document_pages(document_id);",
+    "CREATE INDEX IF NOT EXISTS idx_doc_pages_lookup ON document_pages(document_id, page_number);",
+    "CREATE INDEX IF NOT EXISTS idx_chunks_doc_id ON chunks(document_id);",
+    "CREATE INDEX IF NOT EXISTS idx_chunks_lookup ON chunks(document_id, chunk_index);",
+    "CREATE INDEX IF NOT EXISTS idx_clauses_doc_id ON clauses(document_id);",
+    "CREATE INDEX IF NOT EXISTS idx_clauses_category ON clauses(category);",
+    "CREATE INDEX IF NOT EXISTS idx_documents_status ON documents(processing_status);",
+]
+
 _ALL_TABLES = [
     _CREATE_DOCUMENTS,
     _CREATE_DOCUMENT_PAGES,
@@ -91,7 +101,7 @@ def _get_db_path() -> str:
 def get_connection() -> Generator[sqlite3.Connection, None, None]:
     """
     Yield a sqlite3 connection with WAL journal mode and row factory.
-    Foreign keys are enforced.
+    Foreign keys and performance optimizations are enforced.
     """
     path = _get_db_path()
     # Ensure parent directory exists
@@ -100,6 +110,9 @@ def get_connection() -> Generator[sqlite3.Connection, None, None]:
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA foreign_keys=ON")
+    conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute("PRAGMA cache_size=-64000")  # 64MB memory cache
+    conn.execute("PRAGMA temp_store=MEMORY")
     try:
         yield conn
         conn.commit()
@@ -116,9 +129,11 @@ def get_connection() -> Generator[sqlite3.Connection, None, None]:
 
 
 def init_db() -> None:
-    """Create all tables if they do not exist. Safe to call multiple times."""
+    """Create all tables and performance indices if they do not exist. Safe to call multiple times."""
     logger.info("Initialising database at %s", _get_db_path())
     with get_connection() as conn:
         for ddl in _ALL_TABLES:
             conn.execute(ddl)
-    logger.info("Database ready")
+        for idx in _CREATE_INDEXES:
+            conn.execute(idx)
+    logger.info("Database and performance indices ready")

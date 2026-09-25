@@ -23,7 +23,7 @@ _pipeline = RagPipeline()
     response_model=ComparisonResponse,
     status_code=status.HTTP_200_OK,
 )
-async def compare_documents(request: ComparisonRequest) -> ComparisonResponse:
+def compare_documents(request: ComparisonRequest) -> ComparisonResponse:
     """
     Compares two contracts (e.g. Doc A vs Doc B, or standard vs modified terms)
     and returns a structured comparison by topic with citations and diff classification.

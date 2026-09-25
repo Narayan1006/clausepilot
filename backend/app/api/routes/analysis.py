@@ -33,7 +33,7 @@ router = APIRouter(prefix="/api/analysis", tags=["analysis"])
     summary="Trigger document analysis (Attention Map)",
     status_code=status.HTTP_200_OK,
 )
-async def trigger_analysis(
+def trigger_analysis(
     document_id: str,
     request: Optional[AnalysisRequest] = None,
     doc_service: DocumentService = Depends(get_document_service),
@@ -78,7 +78,7 @@ async def trigger_analysis(
     summary="Get 'Before You Sign' checklist (Phase 3)",
     status_code=status.HTTP_200_OK,
 )
-async def get_checklist(
+def get_checklist(
     document_id: str,
     decision_context: str = Query(default="General Contract Review"),
     doc_service: DocumentService = Depends(get_document_service),
@@ -119,7 +119,7 @@ async def get_checklist(
     summary="Get targeted questions for HR / legal professional (Phase 3)",
     status_code=status.HTTP_200_OK,
 )
-async def get_suggested_questions(
+def get_suggested_questions(
     document_id: str,
     decision_context: str = Query(default="General Contract Review"),
     doc_service: DocumentService = Depends(get_document_service),

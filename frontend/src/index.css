@@ -54,6 +54,29 @@ a {
   text-decoration: none;
 }
 
+:focus-visible {
+  outline: 2px solid var(--accent-indigo);
+  outline-offset: 2px;
+}
+
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--accent-indigo);
+  color: #ffffff;
+  padding: 8px 16px;
+  z-index: 9999;
+  border-radius: 0 0 6px 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: top 0.15s ease-in-out;
+}
+
+.skip-to-content:focus {
+  top: 0;
+}
+
 button {
   cursor: pointer;
   font-family: inherit;

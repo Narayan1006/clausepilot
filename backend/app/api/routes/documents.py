@@ -59,10 +59,11 @@ async def upload_document(
         )
 
     original_filename = file.filename or "unknown.pdf"
-    content_type = file.content_type or "application/octet-stream"
+    from starlette.concurrency import run_in_threadpool
 
     try:
-        result = service.upload_document(
+        result = await run_in_threadpool(
+            service.upload_document,
             file_content=content,
             original_filename=original_filename,
             content_type=content_type,

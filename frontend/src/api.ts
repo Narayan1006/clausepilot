@@ -155,7 +155,13 @@ export async function uploadDocument(file: File): Promise<DocumentUploadResponse
   return uploadResult;
 }
 
-export async function indexDocument(documentId: string): Promise<any> {
+export interface IndexResponse {
+  document_id: string;
+  chunks_indexed: number;
+  message: string;
+}
+
+export async function indexDocument(documentId: string): Promise<IndexResponse> {
   const res = await fetch(`${API_BASE_URL}/api/documents/${documentId}/index`, {
     method: 'POST',
   });

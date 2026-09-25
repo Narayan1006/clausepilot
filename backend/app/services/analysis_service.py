@@ -1,21 +1,31 @@
-"""Analysis Service — Phase 2 stub."""
+"""Analysis Service — Orchestrates contract risk analysis and signing checklists."""
 from __future__ import annotations
+
+from typing import Any, Optional
 from app.core.logging import get_logger
+from app.schemas.analysis_schemas import AnalysisResponse, ChecklistResponse, SuggestedQuestionsResponse
+
 logger = get_logger(__name__)
+
 
 class AnalysisService:
     """
     Generates attention map, obligations, risks, and missing information.
-    Phase 2 implementation pending.
+    Delegates to the central RagPipeline for evidence-grounded analysis.
     """
-    def analyze(self, document_id: str, decision_context: str) -> dict:
-        """Run full analysis pipeline. Phase 2."""
-        raise NotImplementedError("AnalysisService.analyze: Phase 2.")
 
-    def get_checklist(self, document_id: str) -> list:
-        """Generate 'Before You Sign' checklist. Phase 2."""
-        raise NotImplementedError("AnalysisService.get_checklist: Phase 2.")
+    def __init__(self, rag_pipeline: Optional[Any] = None) -> None:
+        from app.services.rag_pipeline import RagPipeline
+        self.rag = rag_pipeline or RagPipeline()
 
-    def get_suggested_questions(self, document_id: str) -> list:
-        """Generate questions for HR / legal professional. Phase 2."""
-        raise NotImplementedError("AnalysisService.get_suggested_questions: Phase 2.")
+    def analyze(self, document_id: str, decision_context: str = "General Contract Review") -> AnalysisResponse:
+        """Run full analysis pipeline."""
+        return self.rag.analyze_document(document_id=document_id, decision_context=decision_context)
+
+    def get_checklist(self, document_id: str, decision_context: str = "General Contract Review") -> ChecklistResponse:
+        """Generate 'Before You Sign' checklist."""
+        return self.rag.generate_checklist(document_id=document_id, decision_context=decision_context)
+
+    def get_suggested_questions(self, document_id: str, decision_context: str = "General Contract Review") -> SuggestedQuestionsResponse:
+        """Generate questions for HR / legal professional."""
+        return self.rag.generate_suggested_questions(document_id=document_id, decision_context=decision_context)

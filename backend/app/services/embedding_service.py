@@ -68,6 +68,7 @@ class SentenceTransformerEmbeddingService:
         self.model_name = model_name or get_settings().embedding_model
         self._model = None
         self._use_fallback = False
+        self._query_cache: dict[str, List[float]] = {}
 
     def _get_model(self):
         if self._use_fallback:
@@ -107,7 +108,13 @@ class SentenceTransformerEmbeddingService:
         return self.embed_documents([text])[0]
 
     def embed_query(self, query: str) -> List[float]:
-        return self.embed_text(query)
+        q_norm = query.strip().lower()
+        if q_norm in self._query_cache:
+            return self._query_cache[q_norm]
+        vec = self.embed_text(query)
+        if len(self._query_cache) < 2048:
+            self._query_cache[q_norm] = vec
+        return vec
 
 
 _embedding_service_instance: Optional[SentenceTransformerEmbeddingService] = None

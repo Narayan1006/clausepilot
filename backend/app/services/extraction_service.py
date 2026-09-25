@@ -10,7 +10,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List
 
-import fitz  # PyMuPDF
+try:
+    import fitz  # PyMuPDF
+except ImportError:
+    fitz = None
 
 from app.core.logging import get_logger
 
@@ -67,6 +70,9 @@ def extract_pdf(file_path: Path) -> ExtractionResult:
     """
     if not file_path.exists():
         raise ExtractionError(f"File not found: {file_path.name}")
+
+    if fitz is None:
+        raise ExtractionError("PDF extraction engine (PyMuPDF) is not installed on this system.")
 
     try:
         doc = fitz.open(str(file_path))

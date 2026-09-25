@@ -10,8 +10,12 @@ import tempfile
 from pathlib import Path
 
 import pytest
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
+try:
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.pagesizes import letter
+    _HAVE_REPORTLAB = True
+except ImportError:
+    _HAVE_REPORTLAB = False
 
 from app.services.extraction_service import (
     ExtractionError,
@@ -24,21 +28,22 @@ from app.services.extraction_service import (
 
 def _make_pdf(pages: list[str]) -> Path:
     """Create a synthetic PDF with given text per page, return temp file path."""
-    buf = io.BytesIO()
-    c = canvas.Canvas(buf, pagesize=letter)
-    for page_text in pages:
-        c.setFont("Helvetica", 12)
-        # Write text line by line
-        y = 750
-        for line in page_text.splitlines():
-            c.drawString(50, y, line[:100])  # truncate very long lines
-            y -= 20
-        c.showPage()
-    c.save()
-    buf.seek(0)
-
     tmp = tempfile.NamedTemporaryFile(suffix=".pdf", delete=False)
-    tmp.write(buf.read())
+    if _HAVE_REPORTLAB:
+        buf = io.BytesIO()
+        c = canvas.Canvas(buf, pagesize=letter)
+        for page_text in pages:
+            c.setFont("Helvetica", 12)
+            y = 750
+            for line in page_text.splitlines():
+                c.drawString(50, y, line[:100])
+                y -= 20
+            c.showPage()
+        c.save()
+        buf.seek(0)
+        tmp.write(buf.read())
+    else:
+        tmp.write(b"%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Count 1/Kids[3 0 R]>>endobj\n3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<<>>>>endobj\nxref\n0 4\n0000000000 65535 f \n0000000009 00000 n \n0000000052 00000 n \n0000000101 00000 n \ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n178\n%%EOF\n")
     tmp.flush()
     tmp.close()
     return Path(tmp.name)

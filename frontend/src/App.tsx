@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   FileText, 
   Upload, 
@@ -42,6 +42,9 @@ import type {
   SuggestedQuestionsResponse,
   ComparisonResponse
 } from './api';
+
+const getErrorMessage = (err: unknown): string => 
+  err instanceof Error ? err.message : String(err);
 
 export function App() {
   const [health, setHealth] = useState<HealthResponse | null>(null);
@@ -92,24 +95,24 @@ export function App() {
   const [comparing, setComparing] = useState(false);
   const [comparisonError, setComparisonError] = useState<string | null>(null);
 
-  const fetchHealth = async () => {
+  const fetchHealth = useCallback(async () => {
     setHealthLoading(true);
     setHealthError(null);
     try {
       const data = await checkHealth();
       setHealth(data);
-    } catch (err: any) {
-      setHealthError(err.message || 'Unable to connect to backend service.');
+    } catch (err: unknown) {
+      setHealthError(getErrorMessage(err) || 'Unable to connect to backend service.');
     } finally {
       setHealthLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchHealth();
   }, []);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
       setUploadError(null);
@@ -121,9 +124,9 @@ export function App() {
       setCompletedItems({});
       setUploadStep('idle');
     }
-  };
+  }, []);
 
-  const handleUploadAndIndex = async (e: React.FormEvent) => {
+  const handleUploadAndIndex = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
 
@@ -140,13 +143,13 @@ export function App() {
 
       setUploadStep('ready');
       setSelectedPage(1);
-    } catch (err: any) {
-      setUploadError(err.message || 'File processing and indexing failed.');
+    } catch (err: unknown) {
+      setUploadError(getErrorMessage(err) || 'File processing and indexing failed.');
       setUploadStep('idle');
     }
-  };
+  }, [file]);
 
-  const handleAsk = async (e?: React.FormEvent, customQ?: string) => {
+  const handleAsk = useCallback(async (e?: React.FormEvent, customQ?: string) => {
     if (e) e.preventDefault();
     const queryText = customQ || question;
     if (!queryText.trim() || !uploadResult || asking) return;
@@ -157,56 +160,56 @@ export function App() {
       const answer = await askQuestion(uploadResult.document_id, queryText, decisionContext);
       setChatHistory(prev => [{ q: queryText, a: answer }, ...prev]);
       if (!customQ) setQuestion('');
-    } catch (err: any) {
-      setQaError(err.message || 'Failed to generate grounded answer.');
+    } catch (err: unknown) {
+      setQaError(getErrorMessage(err) || 'Failed to generate grounded answer.');
     } finally {
       setAsking(false);
     }
-  };
+  }, [question, uploadResult, asking, decisionContext]);
 
-  const handleRunAnalysis = async () => {
+  const handleRunAnalysis = useCallback(async () => {
     if (!uploadResult || analyzing) return;
     setAnalyzing(true);
     setAnalysisError(null);
     try {
       const res = await analyzeDocument(uploadResult.document_id, decisionContext);
       setAnalysis(res);
-    } catch (err: any) {
-      setAnalysisError(err.message || 'Failed to complete document audit.');
+    } catch (err: unknown) {
+      setAnalysisError(getErrorMessage(err) || 'Failed to complete document audit.');
     } finally {
       setAnalyzing(false);
     }
-  };
+  }, [uploadResult, analyzing, decisionContext]);
 
-  const handleFetchChecklist = async () => {
+  const handleFetchChecklist = useCallback(async () => {
     if (!uploadResult || loadingChecklist) return;
     setLoadingChecklist(true);
     setChecklistError(null);
     try {
       const res = await getChecklist(uploadResult.document_id, decisionContext);
       setChecklist(res);
-    } catch (err: any) {
-      setChecklistError(err.message || 'Failed to generate signing checklist.');
+    } catch (err: unknown) {
+      setChecklistError(getErrorMessage(err) || 'Failed to generate signing checklist.');
     } finally {
       setLoadingChecklist(false);
     }
-  };
+  }, [uploadResult, loadingChecklist, decisionContext]);
 
-  const handleFetchQuestions = async () => {
+  const handleFetchQuestions = useCallback(async () => {
     if (!uploadResult || loadingQuestions) return;
     setLoadingQuestions(true);
     setQuestionsError(null);
     try {
       const res = await getSuggestedQuestions(uploadResult.document_id, decisionContext);
       setSuggestedQuestions(res);
-    } catch (err: any) {
-      setQuestionsError(err.message || 'Failed to generate targeted questions.');
+    } catch (err: unknown) {
+      setQuestionsError(getErrorMessage(err) || 'Failed to generate targeted questions.');
     } finally {
       setLoadingQuestions(false);
     }
-  };
+  }, [uploadResult, loadingQuestions, decisionContext]);
 
-  const handleUploadAndIndexB = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUploadAndIndexB = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !e.target.files[0]) return;
     const fileSelected = e.target.files[0];
     setFileB(fileSelected);
@@ -219,13 +222,13 @@ export function App() {
       setUploadStepB('indexing');
       await indexDocument(doc.document_id);
       setUploadStepB('ready');
-    } catch (err: any) {
-      setUploadErrorB(err.message || 'File processing and indexing for Document B failed.');
+    } catch (err: unknown) {
+      setUploadErrorB(getErrorMessage(err) || 'File processing and indexing for Document B failed.');
       setUploadStepB('idle');
     }
-  };
+  }, []);
 
-  const handleRunComparison = async () => {
+  const handleRunComparison = useCallback(async () => {
     if (!uploadResult || !uploadResultB || comparing) return;
     setComparing(true);
     setComparisonError(null);
@@ -236,16 +239,16 @@ export function App() {
         comparisonFocus || undefined
       );
       setComparison(res);
-    } catch (err: any) {
-      setComparisonError(err.message || 'Failed to compare documents.');
+    } catch (err: unknown) {
+      setComparisonError(getErrorMessage(err) || 'Failed to compare documents.');
     } finally {
       setComparing(false);
     }
-  };
+  }, [uploadResult, uploadResultB, comparing, comparisonFocus]);
 
-  const toggleChecklistItem = (idx: number) => {
+  const toggleChecklistItem = useCallback((idx: number) => {
     setCompletedItems(prev => ({ ...prev, [idx]: !prev[idx] }));
-  };
+  }, []);
 
   const getStatusBadge = (status: LegalAnswer['status']) => {
     switch (status) {
@@ -317,6 +320,9 @@ export function App() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <a href="#main-content" className="skip-to-content">
+        Skip to main content
+      </a>
       {/* Header / Navbar */}
       <header style={{
         borderBottom: '1px solid var(--border-color)',
