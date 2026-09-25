@@ -27,12 +27,17 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
 
     # ── CORS ─────────────────────────────────────
-    # Accepts a comma-separated string or a JSON list via env var
+    # Comma-separated list of allowed origins.
+    # In production, set CORS_ORIGINS env var to your Vercel frontend URL,
+    # e.g. "https://clausepilot.vercel.app,https://clausepilot-git-main-user.vercel.app"
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
 
     @property
     def cors_origins_list(self) -> List[str]:
-        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+        raw = [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+        # Always allow localhost for local dev even in production config
+        defaults = ["http://localhost:5173", "http://localhost:3000"]
+        return list(dict.fromkeys(raw + defaults))
 
     # ── Upload Limits ─────────────────────────────
     max_upload_size_mb: int = 20
