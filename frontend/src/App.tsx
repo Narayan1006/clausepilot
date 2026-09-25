@@ -374,6 +374,7 @@ export function App() {
             {healthLoading ? 'Checking...' : healthError ? 'API Disconnected' : `${health?.service} (Phase 3 Prep Engine)`}
             <button 
               onClick={fetchHealth} 
+              aria-label="Refresh health status"
               title="Refresh health status"
               style={{ background: 'none', border: 'none', color: 'inherit', display: 'flex', alignItems: 'center', marginLeft: '0.2rem' }}>
               <RefreshCw size={11} className={healthLoading ? "spin" : ""} />
@@ -397,10 +398,14 @@ export function App() {
               <form onSubmit={handleUploadAndIndex} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {/* Decision Context Dropdown */}
                 <div>
-                  <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.35rem', display: 'block' }}>
+                  <label 
+                    htmlFor="decision-context-select"
+                    style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.35rem', display: 'block' }}>
                     Decision Context
                   </label>
                   <select 
+                    id="decision-context-select"
+                    aria-label="Decision Context"
                     value={decisionContext}
                     onChange={(e) => setDecisionContext(e.target.value)}
                     style={{
@@ -429,8 +434,13 @@ export function App() {
                   backgroundColor: 'rgba(255, 255, 255, 0.02)',
                   position: 'relative'
                 }}>
+                  <label htmlFor="contract-file-input" className="sr-only">
+                    Upload contract PDF document
+                  </label>
                   <input
+                    id="contract-file-input"
                     type="file"
+                    aria-label="Upload contract PDF document"
                     accept=".pdf,application/pdf"
                     onChange={handleFileChange}
                     style={{
@@ -471,6 +481,7 @@ export function App() {
 
                 <button
                   type="submit"
+                  aria-label="Process & Index Document"
                   disabled={!file || (uploadStep !== 'idle' && uploadStep !== 'ready')}
                   style={{
                     padding: '0.7rem 1rem',
@@ -519,8 +530,15 @@ export function App() {
             {uploadResult ? (
               <>
                 {/* Navigation Tabs */}
-                <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', gap: '0.5rem', overflowX: 'auto' }}>
+                <div 
+                  role="tablist" 
+                  aria-label="Document Workspace Sections" 
+                  style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', gap: '0.5rem', overflowX: 'auto' }}
+                >
                   <button
+                    role="tab"
+                    aria-selected={activeTab === 'qa'}
+                    aria-label="Evidence Q&A tab"
                     onClick={() => setActiveTab('qa')}
                     style={{
                       padding: '0.65rem 0.85rem',
@@ -541,6 +559,9 @@ export function App() {
                   </button>
 
                   <button
+                    role="tab"
+                    aria-selected={activeTab === 'analysis'}
+                    aria-label="Attention Map tab"
                     onClick={() => {
                       setActiveTab('analysis');
                       if (!analysis && !analyzing) handleRunAnalysis();
@@ -564,6 +585,9 @@ export function App() {
                   </button>
 
                   <button
+                    role="tab"
+                    aria-selected={activeTab === 'checklist'}
+                    aria-label="Before You Sign Checklist tab"
                     onClick={() => {
                       setActiveTab('checklist');
                       if (!checklist && !loadingChecklist) handleFetchChecklist();
@@ -587,6 +611,9 @@ export function App() {
                   </button>
 
                   <button
+                    role="tab"
+                    aria-selected={activeTab === 'questions'}
+                    aria-label="What To Ask Next tab"
                     onClick={() => {
                       setActiveTab('questions');
                       if (!suggestedQuestions && !loadingQuestions) handleFetchQuestions();
@@ -610,6 +637,9 @@ export function App() {
                   </button>
 
                   <button
+                    role="tab"
+                    aria-selected={activeTab === 'comparison'}
+                    aria-label="Compare Contracts tab"
                     onClick={() => setActiveTab('comparison')}
                     style={{
                       padding: '0.65rem 0.85rem',
@@ -630,6 +660,9 @@ export function App() {
                   </button>
 
                   <button
+                    role="tab"
+                    aria-selected={activeTab === 'pages'}
+                    aria-label="Pages tab"
                     onClick={() => setActiveTab('pages')}
                     style={{
                       padding: '0.65rem 0.85rem',
@@ -655,7 +688,12 @@ export function App() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                     {/* Prompt Box */}
                     <form onSubmit={handleAsk} className="glass-panel" style={{ padding: '1rem', display: 'flex', gap: '0.75rem' }}>
+                      <label htmlFor="qa-question-input" className="sr-only">
+                        Ask a question about the contract
+                      </label>
                       <input
+                        id="qa-question-input"
+                        aria-label="Ask a question about the contract"
                         type="text"
                         value={question}
                         onChange={(e) => setQuestion(e.target.value)}
@@ -673,6 +711,7 @@ export function App() {
                       />
                       <button
                         type="submit"
+                        aria-label="Submit question to ClausePilot"
                         disabled={!question.trim() || asking}
                         style={{
                           padding: '0.75rem 1.25rem',
@@ -704,6 +743,7 @@ export function App() {
                       ].map((sq, idx) => (
                         <button
                           key={idx}
+                          aria-label={`Ask suggested question: ${sq}`}
                           onClick={() => handleAsk(undefined, sq)}
                           style={{
                             padding: '0.3rem 0.65rem',
@@ -795,6 +835,7 @@ export function App() {
                                       <div style={{ display: 'flex', justifyContent: 'space-between', color: '#a5b4fc', fontWeight: 600 }}>
                                         <span>Page {cit.page_number} {cit.clause_number ? `· Clause ${cit.clause_number}` : ''}</span>
                                         <button 
+                                          aria-label={`View page ${cit.page_number} citations`}
                                           onClick={() => {
                                             setSelectedPage(cit.page_number);
                                             setActiveTab('pages');
@@ -916,6 +957,7 @@ export function App() {
                       <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center' }}>
                         <button
                           onClick={handleRunAnalysis}
+                          aria-label="Run First-Pass Audit"
                           style={{
                             padding: '0.75rem 1.5rem',
                             borderRadius: '8px',
@@ -966,6 +1008,7 @@ export function App() {
                           </div>
                           <button
                             onClick={handleFetchChecklist}
+                            aria-label="Regenerate signing checklist"
                             style={{ background: 'none', border: '1px solid var(--border-color)', padding: '0.35rem 0.75rem', borderRadius: '6px', color: 'var(--text-muted)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
                           >
                             <RefreshCw size={12} /> Regenerate
@@ -994,6 +1037,7 @@ export function App() {
                               >
                                 <input
                                   type="checkbox"
+                                  aria-label={`Mark as completed: ${item.item}`}
                                   checked={isDone}
                                   onChange={() => {}} // Handled by div click
                                   style={{ marginTop: '0.2rem', accentColor: '#10b981', cursor: 'pointer' }}
@@ -1034,6 +1078,7 @@ export function App() {
                       <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center' }}>
                         <button
                           onClick={handleFetchChecklist}
+                          aria-label="Generate Signing Checklist"
                           style={{
                             padding: '0.75rem 1.5rem',
                             borderRadius: '8px',
@@ -1094,6 +1139,7 @@ export function App() {
                               }}>
                                 <p>{q}</p>
                                 <button
+                                  aria-label={`Ask in workspace: ${q}`}
                                   onClick={() => {
                                     setQuestion(q);
                                     setActiveTab('qa');
@@ -1137,6 +1183,7 @@ export function App() {
                               }}>
                                 <p>{q}</p>
                                 <button
+                                  aria-label={`Ask in workspace: ${q}`}
                                   onClick={() => {
                                     setQuestion(q);
                                     setActiveTab('qa');
@@ -1163,6 +1210,7 @@ export function App() {
                       <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center' }}>
                         <button
                           onClick={handleFetchQuestions}
+                          aria-label="Generate Targeted Questions"
                           style={{
                             padding: '0.75rem 1.5rem',
                             borderRadius: '8px',
@@ -1198,6 +1246,7 @@ export function App() {
 
                         <button
                           onClick={handleRunComparison}
+                          aria-label="Run Semantic Diff and Conflict Engine"
                           disabled={!uploadResultB || comparing}
                           style={{
                             padding: '0.65rem 1.25rem',
@@ -1265,8 +1314,13 @@ export function App() {
                             </>
                           ) : (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
+                              <label htmlFor="doc-b-file-input" className="sr-only">
+                                Upload second PDF for comparison
+                              </label>
                               <input
+                                id="doc-b-file-input"
                                 type="file"
+                                aria-label="Upload second PDF for comparison"
                                 accept=".pdf,application/pdf"
                                 onChange={handleUploadAndIndexB}
                                 style={{
@@ -1292,10 +1346,14 @@ export function App() {
 
                       {/* Optional Focus Input */}
                       <div>
-                        <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.3rem', display: 'block' }}>
+                        <label 
+                          htmlFor="comparison-focus-input"
+                          style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.3rem', display: 'block' }}>
                           Comparison Focus (Optional)
                         </label>
                         <input
+                          id="comparison-focus-input"
+                          aria-label="Comparison Focus"
                           type="text"
                           value={comparisonFocus}
                           onChange={(e) => setComparisonFocus(e.target.value)}
@@ -1419,6 +1477,7 @@ export function App() {
                                           }}>
                                             <span>"{cit.quote}" (p. {cit.page_number})</span>
                                             <button
+                                              aria-label={`View page ${cit.page_number} citations for Document A`}
                                               onClick={() => {
                                                 setSelectedPage(cit.page_number);
                                                 setActiveTab('pages');
@@ -1476,6 +1535,7 @@ export function App() {
                                             <span>"{cit.quote}" (p. {cit.page_number})</span>
                                             {uploadResultB?.extracted_pages && (
                                               <button
+                                                aria-label={`View page ${cit.page_number} citations for Document B`}
                                                 onClick={() => {
                                                   setSelectedPage(cit.page_number);
                                                   setActiveTab('pages');
@@ -1516,6 +1576,7 @@ export function App() {
                       {uploadResult.extracted_pages?.map((p) => (
                         <button
                           key={p.page_number}
+                          aria-label={`View contract page ${p.page_number}`}
                           onClick={() => setSelectedPage(p.page_number)}
                           style={{
                             padding: '0.4rem 0.85rem',
@@ -1580,9 +1641,9 @@ export function App() {
                   <BookOpen size={30} color="var(--text-faint)" />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: '#f3f4f6', marginBottom: '0.35rem' }}>
+                  <h2 style={{ fontSize: '1.15rem', fontWeight: 600, color: '#f3f4f6', marginBottom: '0.35rem' }}>
                     Workspace Awaiting Contract Intake
-                  </h3>
+                  </h2>
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', maxWidth: '420px', lineHeight: '1.5' }}>
                     Upload an employment agreement, vendor NDA, or rental lease to index into ChromaDB and begin grounded legal Q&A.
                   </p>

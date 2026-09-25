@@ -30,13 +30,18 @@ class Settings(BaseSettings):
     # Comma-separated list of allowed origins.
     # In production, set CORS_ORIGINS env var to your Vercel frontend URL,
     # e.g. "https://clausepilot.vercel.app,https://clausepilot-git-main-user.vercel.app"
-    cors_origins: str = "http://localhost:5173,http://localhost:3000"
+    cors_origins: str = "http://localhost:5173,http://localhost:3000,https://clausepilot-six.vercel.app,https://clausepilot.vercel.app"
 
     @property
     def cors_origins_list(self) -> List[str]:
         raw = [o.strip() for o in self.cors_origins.split(",") if o.strip()]
-        # Always allow localhost for local dev even in production config
-        defaults = ["http://localhost:5173", "http://localhost:3000"]
+        # Always allow localhost and production vercel URLs
+        defaults = [
+            "http://localhost:5173", 
+            "http://localhost:3000",
+            "https://clausepilot-six.vercel.app",
+            "https://clausepilot.vercel.app"
+        ]
         return list(dict.fromkeys(raw + defaults))
 
     # ── Upload Limits ─────────────────────────────

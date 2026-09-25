@@ -58,5 +58,8 @@ backend/chroma_db/
 .DS_Store
 Thumbs.db
 
+# ── Binaries ──────────────────────────────────
+*.exe
+
 # ── Sample PDFs (generated, not tracked) ──────
 sample-documents/*.pdf
